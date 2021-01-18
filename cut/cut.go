@@ -60,10 +60,10 @@ func elementParser(element interface{}, index int, max int) string {
 		return fmt.Sprintf("\"%s\"", data)
 
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64: // Number
-		return fmt.Sprintf("\"%d\"", data)
+		return fmt.Sprintf("%d", data)
 
 	case float32, float64:
-		return fmt.Sprintf("\"%f\"", data)
+		return fmt.Sprintf("%f", data)
 
 	case bool: // Boolean
 		if data {
