@@ -6,6 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 	log "unknwon.dev/clog/v2"
 
+	"github.com/wuhan005/jkit/cut"
 	"github.com/wuhan005/jkit/format"
 )
 
@@ -20,6 +21,7 @@ func main() {
 	app.Usage = "JSON CLI Tool"
 	app.Commands = []*cli.Command{
 		format.Cmd(),
+		cut.Cmd(),
 	}
 	app.HideHelp = true
 
