@@ -16,7 +16,7 @@ func Cmd() *cli.Command {
 		Usage:   "JSON Cutter",
 		Aliases: []string{"c"},
 		Action: func(c *cli.Context) error {
-			deep, _ := strconv.Atoi(c.Args().First())
+			maxDeep, _ := strconv.Atoi(c.Args().First())
 
 			raw := util.ReadClipboard()
 			var data interface{}
@@ -24,36 +24,34 @@ func Cmd() *cli.Command {
 			if err != nil {
 				return err
 			}
-			fmt.Println(elementParser(data, deep, deep))
+			fmt.Println(elementParser(data, 0, maxDeep))
 			return nil
 		},
 	}
 }
 
-func elementParser(element interface{}, index int, max int) string {
+func elementParser(element interface{}, deep int, maxDeep int) string {
 	switch data := element.(type) {
 	case map[string]interface{}: // Object
-		if index < 0 {
+		if deep >= maxDeep {
 			return fmt.Sprintf("{ %d items dict }", len(data))
+		} else if len(data) == 0 {
+			return "{}"
 		}
 
-		idx := 0
 		str := "{\n"
+
+		idx := 0
 		for k, v := range data {
 			idx++
-			for i := index + 1; i < max; i++ {
-				str += "    "
+			str += indent(deep)
+			str += fmt.Sprintf("    \"%s\": %s", k, elementParser(v, deep+1, maxDeep))
+			if idx != len(data) {
+				str += ",\n"
 			}
-			str += fmt.Sprintf("    \"%s\": %s", k, elementParser(v, index-1, max))
-			if idx != len(data)-1 {
-				str += ","
-			}
-			str += "\n"
 		}
-		for i := index + 1; i < max; i++ {
-			str += "    "
-		}
-		str += "}"
+
+		str += "\n" + indent(deep) + "}"
 		return str
 
 	case string: // String
@@ -75,30 +73,32 @@ func elementParser(element interface{}, index int, max int) string {
 		return "NULL"
 
 	case []interface{}: // Array
-		if index < 0 {
+		if deep >= maxDeep {
 			return fmt.Sprintf("[ %d items array ]", len(data))
+		} else if len(data) == 0 {
+			return "[]"
 		}
 
 		str := "[\n"
 
 		for k, v := range data {
-			for i := index; i < max; i++ {
-				str += "    "
-			}
-			str += elementParser(v, index-1, max)
+			str += indent(deep+1) + elementParser(v, deep+1, maxDeep)
 			if k != len(data)-1 {
-				str += ","
+				str += ",\n"
 			}
-			str += "\n"
 		}
 
-		for i := index + 1; i < max; i++ {
-			str += "    "
-		}
-		str += "]"
-
+		str += "\n" + indent(deep) + "]"
 		return str
 	}
 
 	return ""
+}
+
+func indent(deep int) string {
+	str := ""
+	for i := 0; i < deep; i++ {
+		str += "    "
+	}
+	return str
 }
