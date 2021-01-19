@@ -6,6 +6,7 @@ JSON CLI Tool
 
 ```bash
 git clone https://github.com/wuhan005/jkit.git
+cd jkit
 go install
 ```
 
@@ -97,7 +98,7 @@ Copy your JSON first, then enjoy it.
 }
 ```
 
-### `jkit m` Make JSON form string
+### `jkit m` Generate JSON form list
 
 Input from my [GitHub profile README](https://github.com/wuhan005/wuhan005):
 
