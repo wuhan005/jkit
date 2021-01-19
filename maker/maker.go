@@ -1,4 +1,4 @@
-package generate
+package maker
 
 import (
 	"fmt"
@@ -12,9 +12,9 @@ import (
 
 func Cmd() *cli.Command {
 	return &cli.Command{
-		Name:    "generate",
-		Usage:   "JSON Generator",
-		Aliases: []string{"g"},
+		Name:    "maker",
+		Usage:   "JSON Maker",
+		Aliases: []string{"m"},
 		Action: func(c *cli.Context) error {
 			raw := util.ReadClipboard()
 			result, err := generator(raw)

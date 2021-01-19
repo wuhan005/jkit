@@ -8,7 +8,8 @@ import (
 
 	"github.com/wuhan005/jkit/cut"
 	"github.com/wuhan005/jkit/format"
-	"github.com/wuhan005/jkit/generate"
+	"github.com/wuhan005/jkit/get"
+	"github.com/wuhan005/jkit/maker"
 )
 
 func main() {
@@ -23,9 +24,9 @@ func main() {
 	app.Commands = []*cli.Command{
 		format.Cmd(),
 		cut.Cmd(),
-		generate.Cmd(),
+		maker.Cmd(),
+		get.Cmd(),
 	}
-	app.HideHelp = true
 
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal("Failed to start application: %v", err)
