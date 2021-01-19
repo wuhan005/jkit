@@ -8,6 +8,7 @@ import (
 
 	"github.com/wuhan005/jkit/cut"
 	"github.com/wuhan005/jkit/format"
+	"github.com/wuhan005/jkit/generate"
 )
 
 func main() {
@@ -22,6 +23,7 @@ func main() {
 	app.Commands = []*cli.Command{
 		format.Cmd(),
 		cut.Cmd(),
+		generate.Cmd(),
 	}
 	app.HideHelp = true
 
