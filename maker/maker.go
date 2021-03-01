@@ -15,9 +15,13 @@ func Cmd() *cli.Command {
 		Name:    "maker",
 		Usage:   "JSON Maker",
 		Aliases: []string{"m"},
+		Flags: []cli.Flag{
+			&cli.BoolFlag{Name: "repeat", Aliases: []string{"r"}},
+		},
 		Action: func(c *cli.Context) error {
 			raw := util.ReadClipboard()
-			result, err := generator(raw)
+			repeat := c.Bool("repeat")
+			result, err := generator(raw, repeat)
 			if err != nil {
 				return err
 			}
@@ -27,12 +31,22 @@ func Cmd() *cli.Command {
 	}
 }
 
-func generator(input string) (string, error) {
+func generator(input string, removeRepeat bool) (string, error) {
 	group := strings.Split(input, "\n")
-	for k, v := range group {
-		group[k] = strings.TrimSpace(v)
+
+	var newGroup []string
+	dict := map[string]struct{}{}
+
+	for _, v := range group {
+		if _, ok := dict[v]; removeRepeat && ok {
+			continue
+		}
+		dict[v] = struct{}{}
+
+		newGroup = append(newGroup, v)
 	}
-	json, err := jsoniter.MarshalIndent(group, "", "    ")
+
+	json, err := jsoniter.MarshalIndent(newGroup, "", "    ")
 	if err != nil {
 		return "", err
 	}
