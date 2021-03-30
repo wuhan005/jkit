@@ -19,7 +19,7 @@ func Cmd() *cli.Command {
 			&cli.BoolFlag{Name: "repeat", Aliases: []string{"r"}},
 		},
 		Action: func(c *cli.Context) error {
-			raw := util.ReadClipboard()
+			raw := util.ReadInput()
 			repeat := c.Bool("repeat")
 			result, err := generator(raw, repeat)
 			if err != nil {

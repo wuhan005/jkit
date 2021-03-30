@@ -15,7 +15,7 @@ func Cmd() *cli.Command {
 		Usage:   "JSON Format",
 		Aliases: []string{"f"},
 		Action: func(c *cli.Context) error {
-			raw := util.ReadClipboard()
+			raw := util.ReadInput()
 			var data interface{}
 			err := jsoniter.Unmarshal([]byte(raw), &data)
 			if err != nil {

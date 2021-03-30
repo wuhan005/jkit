@@ -18,7 +18,7 @@ func Cmd() *cli.Command {
 		Action: func(c *cli.Context) error {
 			maxDeep, _ := strconv.Atoi(c.Args().First())
 
-			raw := util.ReadClipboard()
+			raw := util.ReadInput()
 			var data interface{}
 			err := jsoniter.Unmarshal([]byte(raw), &data)
 			if err != nil {

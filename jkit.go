@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+	defer log.Stop()
 	err := log.NewConsole()
 	if err != nil {
 		panic("Failed to init log" + err.Error())

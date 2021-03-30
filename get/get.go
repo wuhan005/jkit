@@ -18,7 +18,7 @@ func Cmd() *cli.Command {
 		Usage:   "JSON Getter",
 		Aliases: []string{"g"},
 		Action: func(c *cli.Context) error {
-			raw := util.ReadClipboard()
+			raw := util.ReadInput()
 			chain := c.Args().First()
 			result, err := get(raw, chain)
 			if err != nil {
