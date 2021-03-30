@@ -1,4 +1,4 @@
-# jkit
+# 🔧 jkit [![Go](https://github.com/wuhan005/jkit/actions/workflows/go.yml/badge.svg)](https://github.com/wuhan005/jkit/actions/workflows/go.yml)
 
 JSON CLI Tool
 
