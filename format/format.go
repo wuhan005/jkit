@@ -1,9 +1,9 @@
 package format
 
 import (
+	"encoding/json"
 	"fmt"
 
-	jsoniter "github.com/json-iterator/go"
 	"github.com/urfave/cli/v2"
 
 	"github.com/wuhan005/jkit/util"
@@ -17,17 +17,17 @@ func Cmd() *cli.Command {
 		Action: func(c *cli.Context) error {
 			raw := util.ReadInput()
 			var data interface{}
-			err := jsoniter.Unmarshal([]byte(raw), &data)
+			err := json.Unmarshal([]byte(raw), &data)
 			if err != nil {
 				return err
 			}
 
-			json, err := jsoniter.MarshalIndent(data, "", "    ")
+			jsonBytes, err := json.MarshalIndent(data, "", "    ")
 			if err != nil {
 				return err
 			}
 
-			fmt.Println(string(json))
+			fmt.Println(string(jsonBytes))
 			return nil
 		},
 	}
