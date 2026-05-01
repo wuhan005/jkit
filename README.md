@@ -1,27 +1,53 @@
-# 🔧 jkit [![Go](https://github.com/wuhan005/jkit/actions/workflows/go.yml/badge.svg)](https://github.com/wuhan005/jkit/actions/workflows/go.yml)
+# 🔧 jkit
 
-JSON CLI Tool
+[![Go](https://github.com/wuhan005/jkit/actions/workflows/go.yml/badge.svg)](https://github.com/wuhan005/jkit/actions/workflows/go.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/wuhan005/jkit.svg)](https://pkg.go.dev/github.com/wuhan005/jkit)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+A small, fast JSON CLI for the things you actually do every day: pretty-print, fold deeply nested trees, pluck out a single value, or build a JSON array from a list of lines. Reads from stdin **or** the system clipboard — copy a JSON blob, run `jkit f`, done.
+
+## Features
+
+| Command | Alias | What it does |
+| --- | --- | --- |
+| [`jkit format`](#jkit-f--format-json) | `f` | Pretty-print JSON (4-space indent, keeps numeric precision) |
+| [`jkit cut <depth>`](#jkit-c-depth--fold-json) | `c` | Collapse nodes deeper than `<depth>` into compact summaries |
+| [`jkit get <path>`](#jkit-g-path--extract-by-path) | `g` | Extract a sub-value by dotted path, e.g. `data.items.0.id` |
+| [`jkit maker`](#jkit-m--build-a-json-string-array) | `m` | Turn line-separated text into a JSON string array |
 
 ## Install
 
 ```bash
-git clone https://github.com/wuhan005/jkit.git
-cd jkit
-go install
+go install github.com/wuhan005/jkit/cmd/jkit@latest
 ```
 
-## Usage
-
-Copy your JSON first, then enjoy it.
-
-------
-
-### `jkit f` Format JSON
-
-[Input JSON](https://i.apicon.cn/chunzhen/?ip=52.68.96.58)
+From source:
 
 ```bash
-> jkit f
+git clone https://github.com/wuhan005/jkit.git
+cd jkit
+go install ./cmd/jkit
+```
+
+Requires Go 1.21+. The binary is a single static file with no runtime dependencies.
+
+## Input handling
+
+`jkit` figures out where to read JSON from automatically:
+
+- **Pipe / redirect** — `echo '{"a":1}' | jkit f` or `jkit f < data.json`
+- **Clipboard** — when stdin is a terminal, falls back to the system clipboard. Copy a JSON blob anywhere, then just run `jkit f`.
+
+> If stdin has no data and the clipboard is empty, `jkit` exits with `no input from stdin or clipboard`.
+
+## Commands
+
+### `jkit f` — Format JSON
+
+Pretty-print with 4-space indent. Numbers are decoded with `json.Number`, so big integers like `9223372036854775807` survive round-trip without becoming `9.2233720368e+18`.
+
+```bash
+> echo '{"data":{"area":"东京Amazon数据中心","country":"日本","ip":"52.68.96.58"},"error":0,"msg":"success"}' | jkit f
 
 {
     "data": {
@@ -34,86 +60,77 @@ Copy your JSON first, then enjoy it.
 }
 ```
 
-### `jkit c <deep>` Fold JSON
+### `jkit c <depth>` — Fold JSON
 
-[Input JSON](https://api.bilibili.com/pgc/web/season/section?season_id=34412)
+Collapse anything deeper than `<depth>` levels into `{ N items dict }` / `[ N items array ]` summaries. Object keys are emitted in lexicographic order, so the same input always produces the same output (handy for diffs).
+
+Omit `<depth>` to keep the full tree.
 
 ```bash
-> jkit c 4
+> jkit c 2
 
 {
-    "code": 0.000000,
+    "code": 0,
     "message": "success",
     "result": {
-        "main_section": {
-            "type": 0.000000,
-            "episodes": [
-                { 14 items dict },
-                { 14 items dict },
-                { 14 items dict },
-                { 14 items dict },
-                { 14 items dict },
-            ],
-            "id": 49914.000000,
-            "title": "正片"
-        },
-        "section": [
-            {
-                "id": 50112.000000,
-                "title": "PV",
-                "type": 2.000000,
-                "episodes": [ 3 items array ]
-            }
-        ]
+        "main_section": { 4 items dict },
+        "section": [ 1 items array ]
     }
 }
 ```
 
-### `jkit g` Get JSON element
+### `jkit g <path>` — Extract by path
 
-[Input JSON](https://api.bilibili.com/pgc/web/season/section?season_id=34412)
+Walk a `.`-separated path. Use integer indices for array elements. String leaves print **without quotes** (so you can pipe them straight into other tools); other leaves print as JSON literals.
 
 ```bash
 > jkit g result.main_section.episodes.0
 
 {
     "badge": "会员",
-    "badge_info": {
-        "bg_color": "#FB7299",
-        "bg_color_night": "#BB5B76",
-        "text": "会员"
-    },
-    "cover": "http://i0.hdslb.com/bfs/archive/34a44b83a9c657a9d096d85771334f545e32dd17.jpg",
-    "from": "bangumi",
     "id": 341208,
-    "is_premiere": 0,
-    "status": 13,
-    "title": "1",
-    "vid": "",
-    "badge_type": 0,
-    "long_title": "见习魔女伊蕾娜",
-    "aid": 329827456,
-    "cid": 281989571,
-    "share_url": "https://www.bilibili.com/bangumi/play/ep341208"
+    "title": "1"
 }
+
+> jkit g result.main_section.episodes.0.title
+1
+
+> curl -s https://api.example.com/user | jkit g name | xargs -I{} echo "Hello {}"
 ```
 
-### `jkit m` Generate JSON form list
-
-Input from my [GitHub profile README](https://github.com/wuhan005/wuhan005):
+Errors include the path where things broke:
 
 ```bash
-> jkit m
+> echo '{"a":1}' | jkit g a.b
+jkit: cannot descend into json.Number at a.b
+```
+
+### `jkit m` — Build a JSON string array
+
+Read line-separated text, emit a JSON array. Empty lines are dropped, each line is trimmed, and `\r\n` is handled. Pass `-u` (or `--unique`) to drop duplicates.
+
+```bash
+> cat | jkit m
+Hi, I'm E99p1ant. 🍆
+🐭 Focus on Golang.
+🏠 Blog at github.red.
 
 [
     "Hi, I'm E99p1ant. 🍆",
     "🐭 Focus on Golang.",
-    "🏠 Blog at github.red.",
-    "💬 Ask me something?",
-    "🤤 Buy me a cup of coffee.",
-    "Some cool gadgets I made:",
-    "",
-    "NekoBox - 匿名提问箱 / Anonymous Question Box",
-    "Apicon - API 热爱者"
+    "🏠 Blog at github.red."
 ]
 ```
+
+```bash
+> printf 'apple\nbanana\napple\n' | jkit m -u
+
+[
+    "apple",
+    "banana"
+]
+```
+
+## License
+
+[MIT](LICENSE) © wuhan005

@@ -1,11 +1,14 @@
 module github.com/wuhan005/jkit
 
-go 1.16
+go 1.21
 
 require (
-	github.com/atotto/clipboard v0.1.2
-	github.com/json-iterator/go v1.1.10
-	github.com/pkg/errors v0.9.1
-	github.com/urfave/cli/v2 v2.3.0
-	unknwon.dev/clog/v2 v2.2.0
+	github.com/atotto/clipboard v0.1.4
+	github.com/urfave/cli/v2 v2.27.5
+)
+
+require (
+	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 )
